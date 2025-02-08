@@ -7,6 +7,7 @@ import {
   FlatList,
   StyleSheet,
 } from "react-native";
+import { useRoute } from "@react-navigation/native";
 
 interface Item {
   nome: string;
@@ -14,36 +15,35 @@ interface Item {
   pego: boolean;
 }
 
-const HomeScreen = () => {
-  const [item, setItem] = useState(""); // Nome do item
-  const [lista, setLista] = useState<Item[]>([]); // Lista de compras
-  const [total, setTotal] = useState(0); // Total gasto
+const ListaScreen = () => {
+  const route = useRoute();
+  const { nomeLista } = route.params as { nomeLista: string };
 
-  // Adicionar item à lista
+  const [item, setItem] = useState("");
+  const [lista, setLista] = useState<Item[]>([]);
+  const [total, setTotal] = useState(0);
+
   const adicionarItem = () => {
     if (item.trim() !== "") {
       setLista([...lista, { nome: item, preco: "", pego: false }]);
-      setItem(""); // Limpa o input após adicionar
+      setItem("");
     }
   };
 
-  // Remover item da lista
   const removerItem = (index: number) => {
     const novoItem = lista[index];
     if (novoItem.pego && novoItem.preco) {
-      setTotal(total - parseFloat(novoItem.preco)); // Atualiza o total ao remover
+      setTotal(total - parseFloat(novoItem.preco));
     }
     setLista(lista.filter((_, i) => i !== index));
   };
 
-  // Marcar item como pego e definir o preço
   const definirPreco = (index: number, preco: string) => {
     const novaLista = [...lista];
     novaLista[index].preco = preco;
-    novaLista[index].pego = preco !== ""; // Só marca como pego se tiver preço definido
+    novaLista[index].pego = preco !== "";
     setLista(novaLista);
 
-    // Atualizar total
     const novoTotal = novaLista.reduce(
       (acc, item) =>
         acc + (item.pego && item.preco ? parseFloat(item.preco) : 0),
@@ -54,9 +54,8 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Lista de Compras</Text>
+      <Text style={styles.titulo}>{nomeLista}</Text>
 
-      {/* Input para adicionar item */}
       <TextInput
         style={styles.input}
         placeholder="Digite o nome do item"
@@ -64,12 +63,10 @@ const HomeScreen = () => {
         onChangeText={setItem}
       />
 
-      {/* Botão para adicionar item */}
       <TouchableOpacity style={styles.botao} onPress={adicionarItem}>
         <Text style={styles.botaoTexto}>Adicionar</Text>
       </TouchableOpacity>
 
-      {/* Lista de itens */}
       <FlatList
         data={lista}
         keyExtractor={(item, index) => index.toString()}
@@ -77,7 +74,6 @@ const HomeScreen = () => {
           <View style={[styles.item, item.pego && styles.itemPego]}>
             <Text style={styles.itemTexto}>{item.nome}</Text>
 
-            {/* Input para definir preço */}
             <TextInput
               style={styles.precoInput}
               placeholder="R$"
@@ -86,7 +82,6 @@ const HomeScreen = () => {
               onChangeText={(preco) => definirPreco(index, preco)}
             />
 
-            {/* Botão de remover */}
             <TouchableOpacity onPress={() => removerItem(index)}>
               <Text style={styles.remover}>✖</Text>
             </TouchableOpacity>
@@ -94,19 +89,13 @@ const HomeScreen = () => {
         )}
       />
 
-      {/* Total da compra */}
       <Text style={styles.total}>Total: R$ {total.toFixed(2)}</Text>
     </View>
   );
 };
 
-// Estilos
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#f5f5f5",
-  },
+  container: { flex: 1, padding: 20, backgroundColor: "#f5f5f5" },
   titulo: {
     fontSize: 24,
     fontWeight: "bold",
@@ -118,8 +107,8 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
-    marginBottom: 10,
     backgroundColor: "#fff",
+    marginBottom: 10,
   },
   botao: {
     backgroundColor: "#28a745",
@@ -128,10 +117,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
-  botaoTexto: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  botaoTexto: { color: "#fff", fontWeight: "bold" },
   item: {
     flexDirection: "row",
     alignItems: "center",
@@ -141,12 +127,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 5,
   },
-  itemPego: {
-    backgroundColor: "#d4edda", // Verde claro quando marcado como pego
-  },
-  itemTexto: {
-    fontSize: 16,
-  },
+  itemPego: { backgroundColor: "#d4edda" },
+  itemTexto: { fontSize: 16 },
   precoInput: {
     width: 60,
     borderWidth: 1,
@@ -156,10 +138,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     backgroundColor: "#fff",
   },
-  remover: {
-    color: "red",
-    fontSize: 20,
-  },
+  remover: { color: "red", fontSize: 20 },
   total: {
     fontSize: 20,
     fontWeight: "bold",
@@ -168,4 +147,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default ListaScreen;
